@@ -1,0 +1,697 @@
+@import url('https://fonts.googleapis.com/css2?family=Tektur:wght@400;700&display=swap');
+
+body, #app-container {
+  font-family: 'Tektur', 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-color, #111);
+}
+#app-container.light {
+  background-image: url('https://img.freepik.com/free-vector/gradient-template-background-new-minimalist_483537-4985.jpg?semt=ais_hybrid&w=740');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* Optional: for parallax effect */
+  color: var(--text-color, #111);
+}
+#app-container.dark {
+  background-image: url('https://img.freepik.com/free-vector/gradient-network-connection-background_23-2148879890.jpg?semt=ais_hybrid&w=740');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* Optional: for parallax effect */
+  color: var(--text-color, #eee);
+}
+
+.sidebar-tab--active {
+  background-color: #3498db;
+  border-left: 4px solid #2980b9;
+}
+
+/* ==========================================================================
+   1. SIDEBAR: Fixed vertical nav with collapse/expand
+   ========================================================================== */
+
+/* Base sidebar */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;                     /* Thinner expanded width */
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.4); /* white, high transparency */
+  overflow-y: auto;                 /* scroll if content grows */
+  transition: width 0.3s ease, background-color 0.3s ease;      /* smooth collapse/expand */
+  display: flex;
+  z-index: 900;
+  flex-direction: column;
+}
+
+/* Collapsed state: narrow, icons only */
+.sidebar--collapsed {
+  width: 60px;                      /* Collapsed width */
+}
+
+/* Optional explicit expanded state */
+.sidebar--expanded {
+  width: 200px;
+}
+
+/* Responsive adjustment: full-screen toggled off on small viewports */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;                    /* full width on mobile */
+    position: relative;
+    height: auto;
+  }
+  .sidebar--collapsed {
+    width: 100%;
+  }
+}
+
+
+/* ==========================================================================
+   2. SIDEBAR TAB: Nav items inside sidebar
+   ========================================================================== */
+
+/* Base tab styles */
+.sidebar-tab {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  color: #ecf0f1;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+/* Hover effect: slight scale/translate */
+.sidebar-tab:hover {
+  transform: scale(1.05) translateX(3px);
+  background-color: rgba(236, 240, 241, 0.1);
+}
+
+/* Active tab indicator */
+.sidebar-tab--active {
+  background-color: #1abc9c;        /* accent color */
+  font-weight: bold;
+}
+
+/* Icon‑only mode for collapsed sidebar */
+.sidebar--collapsed .sidebar-tab {
+  justify-content: center;          /* center the icon */
+}
+
+.sidebar-tab--icon-only .tab-label {
+  opacity: 0;
+  width: 0;
+  margin: 0;
+  /* still takes up space for transition if needed */
+  transition: opacity 0.2s ease, width 0.2s ease;
+}
+
+.sidebar-toggle {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  position: absolute;
+  top: 12px;
+  right: 0px;
+  width: 36px;
+  height: 36px;
+  z-index: 10;
+  transition: transform 0.3s ease;
+}
+
+/* Add hover effect */
+.sidebar-toggle:hover {
+  transform: scale(1.1);
+}
+
+/* Optional visual cue (e.g., hamburger icon lines) */
+.sidebar-toggle .bar {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background-color: #333;
+  margin: 4px auto;
+  transition: all 0.3s ease;
+}
+
+/* Dark mode bar color */
+.theme-dark .sidebar-toggle .bar {
+  background-color: #ddd;
+}
+
+
+/* ==========================================================================
+   3. MAIN CONTENT: Area for widgets/plots
+   ========================================================================== */
+
+/* Base content wrapper */
+.main-content {
+  margin-left: 200px;               /* match .sidebar width */
+  padding: 24px;
+  min-height: 100vh;                /* full viewport minus any topbar, if needed */
+  overflow-y: auto;
+  padding-top: 80px; /* adjust depending on topbar height */
+  transition: margin-left 0.3s ease;/* adjust when sidebar collapses */
+  z-index: 1;
+  position: relative; /* needed for z-index to apply */
+}
+
+
+/* Adjust margin when sidebar is collapsed */
+.sidebar--collapsed ~ .main-content {
+  margin-left: 60px;
+}
+.layout--sidebar-collapsed .main-content {
+  margin-left: 60px;
+}
+.layout:not(.layout--sidebar-collapsed) .main-content {
+  margin-left: 200px;
+}
+/* --------------------------------------------------------------------------
+   3a. Grid layout variant
+   -------------------------------------------------------------------------- */
+.content-section {
+  display: none;
+}
+.content-section.active {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(300px, 1fr)); /* Always 3 columns, fixed min width */
+  gap: 24px;
+  justify-items: stretch;
+  align-items: stretch;
+}
+
+@media (max-width: 1200px) {
+  .content-section.active {
+    grid-template-columns: repeat(2, minmax(300px, 1fr));
+  }
+}
+@media (max-width: 800px) {
+  .content-section.active {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ——————————————————————
+   Widget Aspect‑Ratio Helpers
+   —————————————————————— */
+.widget {
+  min-width: 0; /* Prevents overflow in grid layouts */
+  min-height: 200px; /* Ensures consistent height for all widgets */
+  background-color: rgba(0, 0, 0, 0.5); /* semi-transparent black */
+  border-radius: 12px;
+  padding: 3px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+}
+
+.widget:hover {
+  box-shadow: 0 0 16px 4px rgba(52, 152, 219, 0.6), 0 4px 12px rgba(0,0,0,0.1);
+  border: 1.5px solid rgba(52, 152, 219, 0.7);
+}
+
+/* ——————————————————————
+   Loading State
+   —————————————————————— */
+.widget--loading {
+  position: relative;
+  pointer-events: none; /* prevent interactions while loading */
+  background-color: rgba(240, 240, 240, 0.4); /* semi-transparent */
+  min-height: 200px; /* prevent layout collapse */
+  overflow: hidden;
+}
+
+/* Spinner Overlay */
+.widget--loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+  border: 4px solid var(--accent-color, #3498db);
+  border-top: 4px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+/* Spinner Animation */
+@keyframes spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+
+/* ——————————————————————
+   Error State
+   —————————————————————— */
+.widget--error {
+  background-color: rgba(255, 0, 0, 0.05);
+  border: 1px dashed #ff4d4d;
+  color: #d8000c;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+/* Dark mode override */
+.theme-dark .widget--error {
+  background-color: rgba(255, 0, 0, 0.1);
+  color: #ffaaaa;
+  border-color: #ff9999;
+}
+
+/* ==========================================================================
+   4. TOPBAR: Fixed header with optional shadow
+   ========================================================================== */
+.topbar {
+  display: flex;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 200px; /* full sidebar width */
+  right: 0;
+  height: 60px;
+  background-color: var(--topbar-bg, #fff);
+  z-index: 1000;
+  padding: 0 20px;
+  transition: left 0.3s ease;
+  justify-content: flex-start;
+}
+
+.page-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
+  flex: 1 1 0%;
+  text-align: center;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ——————————————————————
+   Fixed vs. Static
+   —————————————————————— */
+/* Updated fixed topbar */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 200px; /* full sidebar width */
+  right: 0;
+  height: 60px;
+  background-color: var(--topbar-bg, #fff);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Align items to the left by default */
+  padding: 0 20px;
+  transition: left 0.3s ease;
+}
+
+/* When sidebar is collapsed */
+.layout--sidebar-collapsed .topbar {
+  left: 60px; /* match collapsed width */
+}
+
+
+
+
+/* ——————————————————————
+   Shadow on Scroll
+   —————————————————————— */
+.topbar--shadow {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* ——————————————————————
+   Responsive Collapse Padding
+   —————————————————————— */
+@media (max-width: 768px) {
+  .topbar--fixed {
+    left: 60px; /* match collapsed sidebar width */
+  }
+}
+/* ——————————————————————
+   Base Pill + Thumb
+   —————————————————————— */
+.theme-toggle {
+  --toggle-width: 48px;
+  --toggle-height: 24px;
+  --thumb-size: 20px;
+
+  width: var(--toggle-width);
+  height: var(--toggle-height);
+  border-radius: var(--toggle-height);
+  background: var(--toggle-bg, #ddd);
+  position: fixed;
+  top: 16px;
+  right: 32px;
+  z-index: 2000;
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle__ball {
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  background: var(--thumb-bg, #fff);
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+/* ——————————————————————
+   Dark / Light States
+   —————————————————————— */
+.theme-toggle--light {
+  --toggle-bg: #ccc;
+  --thumb-bg: #fff;
+}
+.theme-toggle--dark {
+  --toggle-bg: #444;
+  --thumb-bg: #eee;
+}
+
+
+/* ——————————————————————
+   Hover Feedback
+   —————————————————————— */
+.theme-toggle:hover {
+  filter: brightness(1.1);
+}
+
+#app-container.light {
+  --widget-bg: rgba(0, 0, 0, 0.05); /* light mode: light translucent */
+  --widget-text: #111;
+  --bg-color: #f5f5f5;
+  --text-color: #111;
+  --sidebar-bg: rgba(46, 58, 89, 0.85);
+  --topbar-bg: rgba(255, 255, 255, 0.9);
+
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+#app-container.light .sidebar {
+  background: rgba(255, 255, 255, 0.4); /* white, high transparency */
+}
+
+#app-container.light .topbar {
+  background: var(--topbar-bg);
+}
+
+#app-container.light .viz-box {
+  background: var(--widget-bg);
+}
+
+
+#app-container.dark {
+  /* Theme-scoped variables */
+  --bg-color: #121212;
+  --text-color: #eeeeee;
+  --sidebar-bg: rgba(25, 25, 35, 0.9);
+  --topbar-bg: rgba(30, 30, 30, 0.9);
+  --widget-bg: rgba(255, 255, 255, 0.05); /* dark mode: soft white translucent */
+  --widget-text: #eee;
+
+  /* Apply global theme styles */
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Components styled using scoped variables */
+#app-container.dark .sidebar {
+  background-color: var(--sidebar-bg);
+}
+
+#app-container.dark .topbar {
+  background-color: var(--topbar-bg);
+}
+
+#app-container.dark .viz-box {
+  background-color: var(--widget-bg);
+  color: var(--text-color);
+}
+
+.sidebar-tab--active {
+  background-color: var(--accent-color, #3498db);
+  color: white;
+  font-weight: 600;
+  border-left: 4px solid var(--accent-color-dark, #2c80b4);
+  transition: background-color 0.2s ease, border-left 0.2s ease;
+}
+
+/* To handle collapsed sidebar mode gracefully */
+.sidebar--collapsed .sidebar-tab--active {
+  border-left: none;
+  background-color: transparent;
+}
+
+.sidebar-tab--active:hover {
+  filter: brightness(1.1);
+}
+
+/* ========================================
+   Theme Toggle Ball (Inside the Switch)
+======================================== */
+
+/* Ball on the right in dark mode */
+.theme-toggle--dark .theme-toggle__ball {
+  left: 28px;
+}
+
+/* Optional hover effect */
+.theme-toggle:hover .theme-toggle__ball {
+  transform: scale(1.05);
+}
+
+/* ========================================
+   Action Buttons
+======================================== */
+
+.action-button {
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Primary Variant */
+.action-button--primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.action-button--primary:hover {
+  background-color: #0069d9;
+  transform: scale(1.02);
+}
+
+/* Secondary Variant */
+.action-button--secondary {
+  background-color: transparent;
+  color: #007bff;
+  border: 2px solid #007bff;
+}
+
+.action-button--secondary:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Disabled State */
+.action-button--disabled,
+.action-button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* ========================================
+   Filter Controls Section
+======================================== */
+
+.filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px; /* Better than margin for consistent spacing */
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+/* Horizontal layout (default) */
+.filter-controls--horizontal {
+  flex-direction: row;
+}
+
+/* Vertical layout (responsive/mobile) */
+.filter-controls--stacked {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Dropdowns or selects inside filter */
+.filter-controls select,
+.filter-controls input,
+.filter-controls .dropdown {
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  transition: border-color 0.2s ease;
+}
+
+.filter-controls select:focus,
+.filter-controls input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+.sidebar {
+  padding-top: 60px; /* enough room for the toggle */
+}
+
+/* Optional hover effect */
+.filter-controls .dropdown:hover {
+  border-color: #007bff;
+}
+
+.tab-label {
+  margin-left: 8px;
+  transition: opacity 0.2s ease, width 0.2s ease;
+}
+#app-container {
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.sidebar,
+.topbar,
+.viz-box,
+.widget,
+body {
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Accessibility: Focus styles for keyboard navigation */
+.sidebar-tab:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+  background-color: rgba(52, 152, 219, 0.15);
+}
+
+.action-button:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+  background-color: rgba(0, 123, 255, 0.08);
+}
+
+.theme-toggle:focus {
+  outline: 2px solid #ffb300;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.2);
+}
+
+/* =============================
+   Glowing Cursor (CSS only)
+   ============================= */
+body, html {
+  /* Use a custom SVG as a glowing cursor */
+  cursor: url('data:image/svg+xml;utf8,<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="8" fill="%233498db" fill-opacity="0.7"/><filter id="glow"><feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><circle cx="20" cy="20" r="12" fill="%233498db" fill-opacity="0.3" filter="url(%23glow)"/></svg>') 20 20, auto;
+}
+
+/* Optional: pointer cursor for buttons/links with glow */
+button, .action-button, a, .sidebar-tab {
+  cursor: url('data:image/svg+xml;utf8,<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="8" fill="%23ffb300" fill-opacity="0.8"/><filter id="glow"><feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><circle cx="20" cy="20" r="12" fill="%23ffb300" fill-opacity="0.3" filter="url(%23glow)"/></svg>') 20 20, pointer;
+}
+
+/* ========================================
+   Theme Toggle Sliding Animation
+======================================== */
+.theme-toggle--sliding .theme-toggle__ball {
+  animation: theme-toggle-ball-slide 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes theme-toggle-ball-slide {
+  0% {
+    transform: translateX(0) scale(1);
+    box-shadow: 0 0 0 0 rgba(52,152,219,0.2);
+  }
+  30% {
+    transform: translateX(18px) scale(1.15);
+    box-shadow: 0 0 16px 4px rgba(52,152,219,0.25);
+  }
+  60% {
+    transform: translateX(-10px) scale(0.95);
+    box-shadow: 0 0 8px 2px rgba(52,152,219,0.18);
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    box-shadow: 0 0 0 0 rgba(52,152,219,0.0);
+  }
+}
+
+/* ========================================
+   Skeleton Loader for Widgets
+======================================== */
+.widget--skeleton {
+  position: relative;
+  background: linear-gradient(90deg, rgba(200,200,200,0.12) 25%, rgba(220,220,220,0.18) 50%, rgba(200,200,200,0.12) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.2s infinite linear;
+  min-height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Example skeleton content blocks */
+.widget--skeleton .skeleton-bar {
+  height: 18px;
+  width: 80%;
+  margin: 24px auto 12px auto;
+  border-radius: 8px;
+  background: rgba(180,180,180,0.18);
+}
+.widget--skeleton .skeleton-bar.short {
+  width: 40%;
+}
+.widget--skeleton .skeleton-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin: 24px auto 12px auto;
+  background: rgba(180,180,180,0.18);
+}
+
