@@ -1,13 +1,12 @@
 # layout.py
 from dash import html
-from .components import *
 
-tabs = ["overview","disaster-analysis", "economic-impact", "country-profiles", "trends-correlations"]
+from .components import Topbar, Sidebar, ContentSection, tabs
 
 layout = html.Div(id="app-container", className="layout dark", children=[
     Topbar,
     Sidebar,
-    html.Div(id="main-content", className="main-content main-content--grid", children=[
-        ContentSection(tab) for tab in tabs
-    ])
+    html.Main(id="main-content", className="main-content", children=[
+        ContentSection(key) for key, _, _ in tabs
+    ]),
 ])

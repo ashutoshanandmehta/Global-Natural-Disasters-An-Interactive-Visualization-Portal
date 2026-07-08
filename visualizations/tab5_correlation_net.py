@@ -122,8 +122,10 @@ def get_disaster_network_viz(
     fig.add_trace(node_trace)
 
     fig.update_layout(
-        title=f"Disaster Type Correlation Network<br>{metric} in {country} ({year_start}–{year_end})",
-        titlefont_size=18,
+        title=dict(
+            text=f"Disaster Type Correlation Network<br>{metric} in {country} ({year_start}–{year_end})",
+            font=dict(size=18),
+        ),
         showlegend=False,
         hovermode='closest',
         margin=dict(b=20, l=5, r=5, t=40),

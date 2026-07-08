@@ -24,8 +24,7 @@ def get_choropleth_viz(df: pd.DataFrame):
     fitbounds="locations"  # <<< This makes the map occupy more space
 ),
         coloraxis_colorbar=dict(
-            title='GDP Damage (%)',
-            titleside='right'
+            title=dict(text='GDP Damage (%)', side='right')
         ),
         paper_bgcolor='rgba(0,0,0,0.6)',  # transparent background
 plot_bgcolor='rgba(0,0,0,0.6)',   # transparent plot area

@@ -5,6 +5,13 @@ from pathlib import Path
 from utils.data_loader import load_all_csvs
 from visualizations.tab4_small_plots import plot_disaster_types_by_year
 from visualizations.tab4_small_plots import plot_disaster_types_pie_chart
+from ui.theme import apply_theme
+
+# Column names containing apostrophes (kept out of f-strings for Python < 3.12)
+COL_DAMAGE = "Total Damage ('000 US$)"
+COL_RECON = "Reconstruction Costs ('000 US$)"
+COL_INSURED = "Insured Damage ('000 US$)"
+COL_AID = "AID Contribution ('000 US$)"
 
 # Load data - specifically use final_risk_merged.csv, ranked_data.csv, and cities.csv
 data_dir = Path(__file__).resolve().parent / "data" / "Risk_Analysis"
@@ -219,10 +226,10 @@ def update_metrics_card(clickData, selected_country, selected_year, click_state)
                         
                         # Economic Impact
                         html.Div([
-                            html.Div(["💰 Total Damage: ", html.B(f"${int(row['Total Damage (\'000 US$)']):,}" if 'Total Damage (\'000 US$)' in row and pd.notna(row['Total Damage (\'000 US$)']) else "N/A")], style={"fontSize": "12px", "marginBottom": "4px"}),
-                            html.Div(["🏗️ Reconstruction: ", html.B(f"${int(row['Reconstruction Costs (\'000 US$)']):,}" if 'Reconstruction Costs (\'000 US$)' in row and pd.notna(row['Reconstruction Costs (\'000 US$)']) else "N/A")], style={"fontSize": "12px", "marginBottom": "4px"}),
-                            html.Div(["🛡️ Insured Damage: ", html.B(f"${int(row['Insured Damage (\'000 US$)']):,}" if 'Insured Damage (\'000 US$)' in row and pd.notna(row['Insured Damage (\'000 US$)']) else "N/A")], style={"fontSize": "12px", "marginBottom": "4px"}),
-                            html.Div(["🤝 AID Contribution: ", html.B(f"${int(row['AID Contribution (\'000 US$)']):,}" if 'AID Contribution (\'000 US$)' in row and pd.notna(row['AID Contribution (\'000 US$)']) else "N/A")], style={"fontSize": "12px", "marginBottom": "4px"}),
+                            html.Div(["💰 Total Damage: ", html.B(f"${int(row[COL_DAMAGE]):,}" if COL_DAMAGE in row and pd.notna(row[COL_DAMAGE]) else "N/A")], style={"fontSize": "12px", "marginBottom": "4px"}),
+                            html.Div(["🏗️ Reconstruction: ", html.B(f"${int(row[COL_RECON]):,}" if COL_RECON in row and pd.notna(row[COL_RECON]) else "N/A")], style={"fontSize": "12px", "marginBottom": "4px"}),
+                            html.Div(["🛡️ Insured Damage: ", html.B(f"${int(row[COL_INSURED]):,}" if COL_INSURED in row and pd.notna(row[COL_INSURED]) else "N/A")], style={"fontSize": "12px", "marginBottom": "4px"}),
+                            html.Div(["🤝 AID Contribution: ", html.B(f"${int(row[COL_AID]):,}" if COL_AID in row and pd.notna(row[COL_AID]) else "N/A")], style={"fontSize": "12px", "marginBottom": "4px"}),
                         ], style={"marginBottom": "12px", "paddingBottom": "8px", "borderBottom": "1px solid rgba(255,255,255,0.1)"}),
                         
                         # Technical Details
@@ -259,10 +266,10 @@ def update_metrics_card(clickData, selected_country, selected_year, click_state)
         if selected_year == "all":
             # Show metrics for all years for the selected country
             country_year_data = risk_data[risk_data['Country_x'] == selected_country]
-            bar_fig = plot_disaster_types_pie_chart(risk_data, selected_country, None)  # Pass None for year to show all years
+            bar_fig = apply_theme(plot_disaster_types_pie_chart(risk_data, selected_country, None))  # Pass None for year to show all years
         else:
             country_year_data = risk_data[(risk_data['Country_x'] == selected_country) & (risk_data['Start Year'] == selected_year)]
-            bar_fig = plot_disaster_types_pie_chart(risk_data, selected_country, selected_year)
+            bar_fig = apply_theme(plot_disaster_types_pie_chart(risk_data, selected_country, selected_year))
         
         if country_year_data.empty:
             return [
@@ -491,20 +498,11 @@ def initialize_risk_radar(country_options):
     try:
         from visualizations.tab4_risk_spider import country_risk_radar_yearly
         fig = country_risk_radar_yearly(risk_data, default_country)
-        return fig
+        return apply_theme(fig)
     except Exception as e:
         print(f"Error initializing risk radar: {e}")
         return {}
 
-@callback(
-    Output("disaster-pie-chart", "figure"),
-    Input("country-selector", "options"),
-    Input("year-selector", "options")
-)
-def initialize_disaster_pie(country_options, year_options):
-    """Initialize the disaster pie chart with default data."""
-    if not country_options or not year_options or len(country_options) == 0 or len(year_options) == 0:
-        return {}
     
     default_country = country_options[0]["value"]
     default_year = year_options[0]["value"]
@@ -517,14 +515,6 @@ def initialize_disaster_pie(country_options, year_options):
         return {}
 
 
-@callback(
-    Output("vulnerability-radar", "figure"),
-    Input("country-selector", "options")
-)
-def initialize_vulnerability_radar(country_options):
-    """Initialize the vulnerability radar chart with default data."""
-    if not country_options or len(country_options) == 0:
-        return {}
     
     default_country = country_options[0]["value"]
     try:
@@ -550,21 +540,11 @@ def update_risk_radar(selected_country, selected_countries):
     try:
         from visualizations.tab4_risk_spider import country_risk_radar_yearly
         fig = country_risk_radar_yearly(risk_data, selected_country)
-        return fig
+        return apply_theme(fig)
     except Exception as e:
         print(f"Error updating risk radar: {e}")
         return {}
 
-@callback(
-    Output("disaster-pie-chart", "figure", allow_duplicate=True),
-    Input("country-selector", "value"),
-    Input("year-selector", "value"),
-    prevent_initial_call=True
-)
-def update_disaster_pie(selected_country, selected_year):
-    """Update the disaster pie chart based on selected country and year."""
-    if not selected_country or not selected_year:
-        return {}
     
     try:
         from visualizations.tab2_pie_chart import get_pie_viz
@@ -588,20 +568,11 @@ def update_economic_bubble(selected_country):
     try:
         from visualizations.tab4_cluster_chlorepath import plot_cluster_choropleth_by_risk
         fig, title = plot_cluster_choropleth_by_risk(cluster_data, risk_data, country_name=selected_country)
-        return fig,title
+        return apply_theme(fig), title
     except Exception as e:
         print(f"Error updating economic bubble chart: {e}")
         return {},"nothing found"
 
-@callback(
-    Output("vulnerability-radar", "figure", allow_duplicate=True),
-    Input("country-selector", "value"),
-    prevent_initial_call=True
-)
-def update_vulnerability_radar(selected_country):
-    """Update the vulnerability radar chart based on selected country."""
-    if not selected_country:
-        return {}
     
     try:
         from visualizations.tab2_radar_chart import get_radar_viz
@@ -631,8 +602,7 @@ def initialize_region_hotspot_map(country_options, year_options):
     try:
         from visualizations.tab4_region_hotspot import plot_disasters_on_map
         fig = plot_disasters_on_map(risk_data, cities_data, default_country, year_arg)
-        # fig.update_layout(height=400, width=700)
-        return fig
+        return apply_theme(fig)
     except Exception as e:
         print(f"Error initializing region hotspot map: {e}")
         return {}
@@ -652,8 +622,7 @@ def update_region_hotspot_map(selected_country, selected_year, map_style):
         from visualizations.tab4_region_hotspot import plot_disasters_on_map
         year_arg = None if selected_year == "all" else selected_year
         fig = plot_disasters_on_map(risk_data, cities_data, selected_country, year_arg, mapbox_style=map_style)
-        # fig.update_layout(height=400, width=700)
-        return fig
+        return apply_theme(fig)
     except Exception as e:
         print(f"Error updating region hotspot map: {e}")
         return {} 
@@ -673,8 +642,8 @@ def update_tab4_parallel_plot(plot_type, selected_country, selected_year):
         # For parallel plot, we can use all data regardless of year selection
         df = index_data
         fig = plot_parallel_coordinates(df, plot_type=plot_type)
-        fig.update_layout(width=1200, height=500)
-        return fig
+        fig.update_layout(height=460, autosize=True)
+        return apply_theme(fig)
     except Exception as e:
         print(f"Error updating tab4 parallel plot: {e}")
         return {} 
@@ -723,7 +692,7 @@ def update_multi_country_risk_radar(selected_countries):
             selected_countries = [selected_countries]
         selected_countries = selected_countries[:4]
         fig = multi_country_risk_radar_with_slider(risk_data, selected_countries)
-        return fig
+        return apply_theme(fig)
     except Exception as e:
         print(f"Error updating multi-country risk radar: {e}")
         return {}
@@ -742,9 +711,9 @@ def update_tab2_barchart():
     # if not s:
     #     return {}
     try:
-        from visualizations.tab2_stacked_area import plot_stacked_disasters_by_year 
+        from visualizations.tab2_stacked_area import plot_stacked_disasters_by_year
         fig = plot_stacked_disasters_by_year(risk_data)
-        return fig
+        return apply_theme(fig)
     except Exception as e:
         print(f"Error updating region hotspot map: {e}")
         return {} 

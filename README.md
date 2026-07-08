@@ -1,20 +1,85 @@
-# Natural-disasters-data-visualization-V2
-#This is a temporary edit to this doc, just to describe how the vizualization files will be used
+# Global Natural Disasters — An Interactive Visualization Portal
 
-1. tab1_chloropleth.py -> no dropdowns as such as it describes the overall world data, across the overall time frame managed by the slider
+An interactive web dashboard for exploring a century of global natural-disaster
+data — human losses, economic damage, and country-level vulnerability — built
+with [Dash](https://dash.plotly.com/) and [Plotly](https://plotly.com/python/).
 
-2. tab1_treemap.py -> -the user enters country and a specific metric ( so two dropdown menus)
-                      -the user can enter "World" that handles the overall data , and the code also handles that. So make sure the country drop down has "World" option.
+The portal brings together disaster-event records, economic-impact figures, and
+~50 country risk indicators into a single explorable interface, so patterns
+across disaster type, geography, and time can be examined side by side.
 
-3. tab5_ rolling_corr.py -> - dropdowns are : country( "World" included as said above),
-                                               disaster type ("All" included , and the code handles data accordingly, 
-                                               metric x, metric y, window size)
+## Features
 
-4. tab5_multi_metric.py -> -dropdowns: country(as said above), disaster type(as said above)
+The dashboard is organised into seven tabs:
 
-5. tab5_correlation_mat.py -> -dropdowns: country(as said above), start year, end year
+| Tab | What it shows |
+| --- | --- |
+| **Overview & Global Patterns** | World choropleth and high-level summaries of disaster impact across countries and time, driven by a year slider. |
+| **Disaster Type Analysis** | Breakdown by disaster type — bar, pie, radar, Sankey and stacked-area views of how different hazards contribute to impact. |
+| **Economic Impact & Vulnerability** | Economic losses over time, plus bubble/scatter/lollipop comparisons of damage against wealth and exposure. |
+| **Country Risk Profiles** | Per-country deep dive — risk radar, hotspot maps, parallel-coordinate and word-cloud summaries of a country's risk profile. |
+| **Risk Clusters (UMAP)** | Countries projected from ~50 risk indicators into 2-D with UMAP; nearby countries share a similar risk profile. Click a point to profile its cluster. |
+| **Trends & Correlations** | Rolling correlations, correlation matrices, scatter matrices, multi-metric trends and a correlation network between metrics and disaster types. |
+| **Data & Sources** | Provenance and links for every dataset used. |
 
-6. tab5_scatter_mat.py -> -dropdowns: country(as said above), disaster type(as said above), metric x, metric y, start year , end year
+## Tech stack
 
-7. tab5_correlation_net.py -> dropdowns: country("World" not needed here), start year, end year, correlation threshold, metric
+- **Python 3.9+**
+- **Dash** and **Plotly** for the app and charts
+- **pandas** / **numpy** for data wrangling
+- **scikit-learn** + **umap-learn** for the risk-cluster projection
+- **networkx** for the correlation network, **wordcloud** for country summaries
+- **pycountry** / **fuzzywuzzy** for country-name normalisation
 
+## Getting started
+
+```bash
+# 1. Clone
+git clone https://github.com/ashutoshanandmehta/Global-Natural-Disasters-An-Interactive-Visualization-Portal.git
+cd Global-Natural-Disasters-An-Interactive-Visualization-Portal
+
+# 2. Create and activate a virtual environment
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Run
+python app.py
+```
+
+Then open <http://127.0.0.1:8065> in your browser.
+
+### Regenerating the UMAP embedding (optional)
+
+The precomputed embedding ships in `data/processed/umap_embedding.csv`. To
+recompute it from the risk data:
+
+```bash
+python preprocessing/compute_umap.py
+```
+
+## Project structure
+
+```
+app.py                 # Dash entry point (registers layout + callbacks)
+callbacks.py           # Interactive callbacks for most tabs
+callbacks_extra.py     # Overview + Risk Clusters (UMAP) callbacks
+ui/                    # Layout, components and theme
+visualizations/        # One module per chart, grouped by tab
+preprocessing/         # Data-preparation and UMAP scripts
+data/                  # Raw datasets, risk analysis and processed CSVs
+assets/                # CSS and JavaScript
+```
+
+## Data sources
+
+- **Our World in Data** — natural disasters (ourworldindata.org/natural-disasters)
+- **EM-DAT** — international disaster database, CRED / UCLouvain (emdat.be)
+- **WorldRiskReport** — risk and vulnerability indicators (weltrisikobericht.de)
+- **Countries States Cities Database** — geo reference data (github.com/dr5hn)
+
+## Acknowledgements
+
+Built as a course project for **CS661 — Big Data Visual Analytics**.

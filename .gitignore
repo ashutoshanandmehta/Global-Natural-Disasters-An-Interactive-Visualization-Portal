@@ -1,1 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Node
 node_modules/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Local scratch / unused
+*.unused
+main
+project_structure.txt
