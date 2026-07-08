@@ -49,16 +49,8 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Then open <http://127.0.0.1:8065> in your browser.
+Then open in your browser.
 
-### Regenerating the UMAP embedding (optional)
-
-The precomputed embedding ships in `data/processed/umap_embedding.csv`. To
-recompute it from the risk data:
-
-```bash
-python preprocessing/compute_umap.py
-```
 
 ## Project structure
 
