@@ -15,5 +15,11 @@ app = Dash(
 app.title = "Global Natural Disasters — Visualization Portal"
 app.layout = layout
 
+# WSGI entry point for production servers (e.g. `gunicorn app:server` on Render)
+server = app.server
+
 if __name__ == "__main__":
-    app.run(debug=True, port=8065)
+    # Local development server. In production the app is served via `server` above.
+    import os
+
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8065)))

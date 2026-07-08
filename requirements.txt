@@ -1,12 +1,15 @@
+# Runtime dependencies for the deployed app.
+# To regenerate the UMAP embedding (preprocessing/compute_umap.py) you also need:
+#   pip install umap-learn
 dash==4.4.0
 plotly==6.8.0
 pandas==2.3.3
 numpy==2.0.2
 scikit-learn==1.6.1
 scipy==1.13.1
-umap-learn==0.5.12
 networkx==3.2.1
 wordcloud==1.9.6
 pycountry
 fuzzywuzzy
 python-Levenshtein
+gunicorn==23.0.0

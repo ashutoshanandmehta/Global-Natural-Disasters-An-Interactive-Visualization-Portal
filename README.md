@@ -49,8 +49,32 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Then open in your browser.
+Then open <http://127.0.0.1:8065> in your browser.
 
+
+## Deployment (Render)
+
+This app is a long-running Dash/Flask server and is deployed on
+[Render](https://render.com/). The repo ships everything Render needs:
+
+- `server = app.server` in `app.py` — the WSGI entry point
+- `render.yaml` — infrastructure blueprint (build/start commands, Python version)
+- `Procfile` and `runtime.txt` — for a manual (dashboard) setup
+
+**Deploy in a few clicks:**
+
+1. Push this repo to GitHub (already done).
+2. On the [Render dashboard](https://dashboard.render.com/), choose
+   **New → Blueprint** and select this repository. Render reads `render.yaml`
+   and provisions the web service automatically.
+   *(Or **New → Web Service** and let it auto-detect: build
+   `pip install -r requirements.txt`, start
+   `gunicorn app:server --bind 0.0.0.0:$PORT`.)*
+3. Click **Deploy**. Render installs the dependencies and starts gunicorn; the
+   app comes up at `https://<your-service>.onrender.com`.
+
+> The free plan spins the service down after inactivity, so the first request
+> after idle takes a few extra seconds to wake it.
 
 ## Project structure
 
